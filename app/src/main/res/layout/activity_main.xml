@@ -123,8 +123,6 @@
 
 
         <!--expense items-->
-
-
         <TextView
             android:id="@+id/recyclerviewex_title"
             android:layout_width="wrap_content"
