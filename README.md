@@ -1,1 +1,1 @@
-# budget-tracker
+# this is an income and expense tracker
