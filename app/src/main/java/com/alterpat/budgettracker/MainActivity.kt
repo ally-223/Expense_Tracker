@@ -19,9 +19,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var deletedTransaction: Transaction
     private lateinit var transactions : List<Transaction>
     private lateinit var oldTransactions : List<Transaction>
-    private lateinit var transactionAdapter: TransactionAdapter
+    private lateinit var expenseAdapter: ExpenseAdapter
+    private lateinit var incomeAdapter: IncomeAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
     private lateinit var db : AppDatabase
+    private lateinit var linearLayoutManagerEx: LinearLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,16 +31,24 @@ class MainActivity : AppCompatActivity() {
 
         transactions = arrayListOf()
 
-        transactionAdapter = TransactionAdapter(transactions)
+        incomeAdapter = IncomeAdapter(transactions)
         linearLayoutManager = LinearLayoutManager(this)
+
+        expenseAdapter = ExpenseAdapter(transactions)
+        linearLayoutManagerEx = LinearLayoutManager(this)
 
         db = Room.databaseBuilder(this,
         AppDatabase::class.java,
         "transactions").build()
 
         recyclerview.apply {
-            adapter = transactionAdapter
+            adapter = incomeAdapter
             layoutManager = linearLayoutManager
+        }
+
+        recyclerviewex.apply {
+            adapter = expenseAdapter
+            layoutManager = linearLayoutManagerEx
         }
 
 
@@ -73,7 +83,8 @@ class MainActivity : AppCompatActivity() {
 
             runOnUiThread {
                 updateDashboard()
-                transactionAdapter.setData(transactions)
+                incomeAdapter.setData(transactions)
+                expenseAdapter.setData(transactions)
             }
         }
     }
@@ -94,7 +105,8 @@ class MainActivity : AppCompatActivity() {
             transactions = oldTransactions
 
             runOnUiThread {
-                transactionAdapter.setData(transactions)
+                incomeAdapter.setData(transactions)
+                expenseAdapter.setData(transactions)
                 updateDashboard()
             }
         }
@@ -121,7 +133,8 @@ class MainActivity : AppCompatActivity() {
             transactions = transactions.filter { it.id != transaction.id }
             runOnUiThread {
                 updateDashboard()
-                transactionAdapter.setData(transactions)
+                incomeAdapter.setData(transactions)
+                expenseAdapter.setData(transactions)
                 showSnackbar()
             }
         }
