@@ -3,6 +3,7 @@ package com.alterpat.budgettracker
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -25,16 +26,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db : AppDatabase
     private lateinit var linearLayoutManagerEx: LinearLayoutManager
 
+    private fun getIncomeTransaction(transactions: List<Transaction>): List<Transaction> {
+        return transactions.filter { it.amount>0 }
+    }
+
+    private fun getExpenseTransaction(transactions: List<Transaction>): List<Transaction> {
+        return transactions.filter { it.amount<0 }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         transactions = arrayListOf()
 
-        incomeAdapter = IncomeAdapter(transactions)
+        incomeAdapter = IncomeAdapter(getIncomeTransaction(transactions))
         linearLayoutManager = LinearLayoutManager(this)
 
-        expenseAdapter = ExpenseAdapter(transactions)
+        expenseAdapter = ExpenseAdapter(getExpenseTransaction(transactions))
         linearLayoutManagerEx = LinearLayoutManager(this)
 
         db = Room.databaseBuilder(this,
@@ -63,13 +72,34 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                deleteTransaction(transactions[viewHolder.adapterPosition])
+                deleteTransaction(getIncomeTransaction(transactions)[viewHolder.adapterPosition])
             }
+
+
+        }
+
+        val itemTouchHelperEx = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                deleteTransaction(getExpenseTransaction(transactions)[viewHolder.adapterPosition])
+            }
+
 
         }
 
         val swipeHelper = ItemTouchHelper(itemTouchHelper)
         swipeHelper.attachToRecyclerView(recyclerview)
+
+        val swipeHelperEx = ItemTouchHelper(itemTouchHelperEx)
+        swipeHelperEx.attachToRecyclerView(recyclerviewex)
+
 
         addBtn.setOnClickListener {
             val intent = Intent(this, AddTransactionActivity::class.java)
@@ -83,9 +113,10 @@ class MainActivity : AppCompatActivity() {
 
             runOnUiThread {
                 updateDashboard()
-                incomeAdapter.setData(transactions)
-                expenseAdapter.setData(transactions)
+                incomeAdapter.setData(getIncomeTransaction(transactions))
+                expenseAdapter.setData(getExpenseTransaction(transactions))
             }
+
         }
     }
     private fun updateDashboard(){
@@ -105,8 +136,8 @@ class MainActivity : AppCompatActivity() {
             transactions = oldTransactions
 
             runOnUiThread {
-                incomeAdapter.setData(transactions)
-                expenseAdapter.setData(transactions)
+                incomeAdapter.setData(getIncomeTransaction(transactions))
+                expenseAdapter.setData(getExpenseTransaction(transactions))
                 updateDashboard()
             }
         }
@@ -129,12 +160,13 @@ class MainActivity : AppCompatActivity() {
 
         GlobalScope.launch {
             db.transactionDao().delete(transaction)
-
+            Log.d("transaction", transactions.toString())
             transactions = transactions.filter { it.id != transaction.id }
+            Log.d("transaction", transactions.toString())
             runOnUiThread {
                 updateDashboard()
-                incomeAdapter.setData(transactions)
-                expenseAdapter.setData(transactions)
+                incomeAdapter.setData(getIncomeTransaction(transactions))
+                expenseAdapter.setData(getExpenseTransaction(transactions))
                 showSnackbar()
             }
         }

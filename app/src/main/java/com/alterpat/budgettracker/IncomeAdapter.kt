@@ -25,9 +25,6 @@ class IncomeAdapter(private var transactions: List<Transaction>) :
         val transaction = transactions[position]
         val context = holder.amount.context
 
-        if(transaction.amount<0){
-            return
-        }
             holder.amount.text = "+ $%.2f".format(transaction.amount)
             holder.amount.setTextColor(ContextCompat.getColor(context, R.color.green))
 

@@ -1,6 +1,7 @@
 package com.alterpat.budgettracker
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,9 +26,8 @@ class ExpenseAdapter(private var transactions: List<Transaction>) :
         val transaction = transactions[position]
         val context = holder.amount.context
 
-        if(transaction.amount > 0){
-          return
-        }
+        Log.d("transaction", transaction.toString())
+
         holder.amount.text = "- $%.2f".format(Math.abs(transaction.amount))
         holder.amount.setTextColor(ContextCompat.getColor(context, R.color.red))
 
